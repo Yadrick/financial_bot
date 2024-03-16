@@ -12,3 +12,6 @@ create-migration:
 
 local-migration-up:
 	alembic -x env_path=".env.local" upgrade head
+
+local-migration-base:
+	alembic -x env_path=".env.local" downgrade base

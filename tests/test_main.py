@@ -1,4 +1,4 @@
-import main
+from for_test import sum_word
 
 
 def test_sum_word():
@@ -6,6 +6,6 @@ def test_sum_word():
     word_2 = "jandos"
     correct_answer = "hellojandos"
 
-    answer = main.sum_word(word_1, word_2)
+    answer = sum_word(word_1, word_2)
 
     assert answer == correct_answer

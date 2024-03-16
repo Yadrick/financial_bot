@@ -1,6 +1,6 @@
 from logging.config import fileConfig
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from alembic import context
 
@@ -33,14 +33,13 @@ target_metadata = None
 
 # Settings from env files
 class MigrationSettings(BaseSettings):
+    model_config = SettingsConfigDict(extra="ignore")
     pg_host: str
     pg_port: str
     db_driver: str
     postgres_user: str
     postgres_password: str
     postgres_db: str
-    app_host: str
-    app_port: int
 
 
 def run_migrations_offline() -> None:
@@ -81,9 +80,7 @@ def run_migrations_online() -> None:
     connectable = create_engine(url)
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-            )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
