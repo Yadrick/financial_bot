@@ -1,4 +1,4 @@
-from for_test import sum_word
+from for_test.for_test import sum_word
 
 
 def test_sum_word():
