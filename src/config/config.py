@@ -1,4 +1,4 @@
-API_token = "6308147011:AAGHiPioNhJNnJGkJXfp9H07Ebn_8yDZJuI"
+API_token = "-"
 API_Link = "https://api.telegram.org/bot{API_token}/"
 
 
