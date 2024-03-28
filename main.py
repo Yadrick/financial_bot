@@ -131,7 +131,7 @@ def main():
             },
         ).json()
 
-        if updates["result"]:
+        if "result" in updates:
             # Обрабатываем каждое новое обновление
             for update in updates["result"]:
                 chat_id = update["message"]["chat"]["id"]
