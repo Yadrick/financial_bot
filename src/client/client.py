@@ -36,4 +36,3 @@ class TelegramClient(BaseClient):
         data = {"chat_id": str(chat_id), "text": text}
         response = requests.post(url, data=data)
         return response.json()
-
