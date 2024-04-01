@@ -1,4 +1,9 @@
-API_token = "6308147011:AAGHiPioNhJNnJGkJXfp9H07Ebn_8yDZJuI"
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+API_token = os.getenv("API_token")
 API_Link = "https://api.telegram.org/bot{API_token}/"
 
 
