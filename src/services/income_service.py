@@ -3,10 +3,10 @@ from ..app.machine_commands import CommandsMachine, Commands
 from ..client.interface import BaseClient
 from ..repository.interface import BaseRepository
 from ..config.config import (
-    MESSAGE_ENTER_DATE,
+    MESSAGE_ENTER_DATE_INCOME,
     MESSAGE_ENTER_CATEGORY,
     MESSAGE_ENTER_AMOUNT,
-    MESSAGE_SUCCESS,
+    MESSAGE_SUCCESS_INCOME,
 )
 
 
@@ -34,7 +34,7 @@ class MakeIncomeService:
             return state, last_info, command
         elif state.current_state == State.RECEIVED_CATEGORY:
             last_info["category"] = text
-            self.client.send_message(chat_id, MESSAGE_ENTER_DATE)
+            self.client.send_message(chat_id, MESSAGE_ENTER_DATE_INCOME)
             state.change_state(State.RECEIVED_DATE)
             return state, last_info, command
         elif state.current_state == State.RECEIVED_DATE:
@@ -44,7 +44,7 @@ class MakeIncomeService:
             return state, last_info, command
         elif state.current_state == State.RECEIVED_AMOUNT:
             last_info["amount"] = text
-            self.client.send_message(chat_id, MESSAGE_SUCCESS)
+            self.client.send_message(chat_id, MESSAGE_SUCCESS_INCOME)
             self.repository.save(last_info)
             state.change_state(State.START)
             command.change_command(Commands.NONE)
