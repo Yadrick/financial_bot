@@ -45,7 +45,7 @@ class MakeIncomeService:
         elif state.current_state == State.RECEIVED_AMOUNT:
             last_info["amount"] = text
             self.client.send_message(chat_id, MESSAGE_SUCCESS)
-            # self.repository.save(last_info)
+            self.repository.save(last_info)
             state.change_state(State.START)
             command.change_command(Commands.NONE)
             last_info = {}

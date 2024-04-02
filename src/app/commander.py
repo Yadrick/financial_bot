@@ -30,13 +30,11 @@ class Commander:
 
         if updates:
             for update in updates:
-                client_information = (
-                    ClientInformation(  # TODO: Check fields in 'update'
-                        update["message"]["from"]["first_name"],
-                        update["update_id"],
-                        update["message"]["chat"]["id"],
-                        update["message"]["text"],
-                    )
+                client_information = ClientInformation(
+                    update["message"]["from"]["first_name"],
+                    update["update_id"],
+                    update["message"]["chat"]["id"],
+                    update["message"]["text"],
                 )
                 self.last_update_id = update["update_id"] + 1
 
@@ -47,15 +45,11 @@ class Commander:
                     clients[client_information.chat_id] = ClientStateInfo(
                         state, last_info, command
                     )
-                    print(f"if: {command.current_command}")
                 else:
                     client_state_info = clients[client_information.chat_id]
                     state = client_state_info.state
                     command = client_state_info.command
                     last_info = client_state_info.last_info
-                    print(f"else: {command.current_command}")
-
-                # print(clients[client_information.chat_id].command.current_command)
 
                 if client_information.text in ("/start", "/help"):
                     self.client.send_message(
@@ -79,19 +73,3 @@ class Commander:
                 else:
                     self.client.send_message(client_information.chat_id, WRONG_INPUT)
                 return clients
-
-    def init_user_tracking(
-        client_information: ClientInformation, clients: dict[int:ClientStateInfo]
-    ):
-        if client_information.chat_id not in clients.keys():
-            state = StateMachine()
-            command = CommandsMachine()
-            last_info = {}
-            clients[client_information.chat_id] = ClientStateInfo(
-                state, last_info, command
-            )
-        else:
-            client_state_info = clients[client_information.chat_id]
-            state = client_state_info.state
-            command = client_state_info.command
-            last_info = client_state_info.last_info
