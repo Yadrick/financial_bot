@@ -16,7 +16,7 @@ class Commands(Enum):
 
 class CommandsMachine:
     """
-    Class for storing and updating client state
+    Class for storing and updating client commands
     """
 
     def __init__(self):
