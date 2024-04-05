@@ -4,6 +4,7 @@ from ..app.machine_state import StateMachine
 from ..app.machine_commands import CommandsMachine, Commands
 from ..client.client import ClientInformation
 from ..client.interface import BaseClient
+from ..errors.app_errors import BaseAppError
 from ..services.income_service import MakeIncomeService
 from ..config.config import STARTING_MESSAGE, WRONG_INPUT
 
@@ -26,6 +27,7 @@ class Commander:
         self.last_update_id = 0
 
     def manage(self, clients: dict[int:ClientStateInfo]):
+
         updates = self.client.get_update(self.last_update_id)
 
         if updates:
@@ -37,39 +39,41 @@ class Commander:
                     update["message"]["text"],
                 )
                 self.last_update_id = update["update_id"] + 1
+                try:
+                    if client_information.chat_id not in clients.keys():
+                        state = StateMachine()
+                        command = CommandsMachine()
+                        last_info = {}
+                        clients[client_information.chat_id] = ClientStateInfo(
+                            state, last_info, command
+                        )
+                    else:
+                        client_state_info = clients[client_information.chat_id]
+                        state = client_state_info.state
+                        command = client_state_info.command
+                        last_info = client_state_info.last_info
 
-                if client_information.chat_id not in clients.keys():
-                    state = StateMachine()
-                    command = CommandsMachine()
-                    last_info = {}
-                    clients[client_information.chat_id] = ClientStateInfo(
-                        state, last_info, command
-                    )
-                else:
-                    client_state_info = clients[client_information.chat_id]
-                    state = client_state_info.state
-                    command = client_state_info.command
-                    last_info = client_state_info.last_info
+                    if client_information.text in ("/start", "/help"):
+                        self.client.send_message(
+                            client_information.chat_id, STARTING_MESSAGE
+                        )
+                    elif (
+                        client_information.text == "/make_income" or
+                        clients[client_information.chat_id].command.current_command == Commands.MAKE_INCOME
+                    ):
+                        state, last_info, command = self.make_income_service.make_income(
+                            update["message"]["text"],
+                            state,
+                            last_info,
+                            update["message"]["chat"]["id"],
+                            command,
+                        )
+                        clients[client_information.chat_id] = ClientStateInfo(
+                            state, last_info, command
+                        )
+                    else:
+                        self.client.send_message(client_information.chat_id, WRONG_INPUT)
+                except BaseAppError as error:
+                    self.client.send_message(client_information.chat_id, error.msg)
 
-                if client_information.text in ("/start", "/help"):
-                    self.client.send_message(
-                        client_information.chat_id, STARTING_MESSAGE
-                    )
-                elif (
-                    client_information.text == "/make_income"
-                    or clients[client_information.chat_id].command.current_command
-                    == Commands.MAKE_INCOME
-                ):
-                    state, last_info, command = self.make_income_service.make_income(
-                        update["message"]["text"],
-                        state,
-                        last_info,
-                        update["message"]["chat"]["id"],
-                        command,
-                    )
-                    clients[client_information.chat_id] = ClientStateInfo(
-                        state, last_info, command
-                    )
-                else:
-                    self.client.send_message(client_information.chat_id, WRONG_INPUT)
-                return clients
+        return clients
