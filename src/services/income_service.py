@@ -1,7 +1,9 @@
 from datetime import datetime
 
-from ..app.machine_state import StateMachine, State
-from ..app.machine_commands import CommandsMachine, Commands
+from ..app.commander import ClientStateInfo
+from ..app.machine_state import State
+from ..app.machine_commands import Commands
+from ..client.client import ClientInformation
 from ..client.interface import BaseClient
 from ..errors.app_errors import WrongInputError
 from ..repository.interface import BaseRepository
@@ -9,10 +11,9 @@ from ..config.config import (
     MESSAGE_ENTER_DATE,
     MESSAGE_ENTER_CATEGORY,
     MESSAGE_ENTER_AMOUNT,
-    MESSAGE_SUCCESS,
     WRONG_INPUT_CATEGORY,
     WRONG_INPUT_DATE,
-    WRONG_INPUT_AMOUNT,
+    WRONG_INPUT_AMOUNT, SAVED_RECORD,
 )
 
 
@@ -26,92 +27,70 @@ class MakeIncomeService:
         self.repository = repository
 
     def _start_processing(
-            self,
-            state: StateMachine,
-            last_info: dict,
-            chat_id: int,
-            command: CommandsMachine,
-    ) -> tuple[StateMachine, dict, CommandsMachine]:
+            self, client_information: ClientInformation, client_state_info: ClientStateInfo
+    ) -> ClientStateInfo:
         categories = self.repository.get_categories()
-        self.client.send_message(chat_id, MESSAGE_ENTER_CATEGORY)
-        self.client.send_message(chat_id, str(categories))
-        state.change_state(State.RECEIVED_CATEGORY)
-        command.change_command(Commands.MAKE_INCOME)
-        return state, last_info, command
+        client_state_info.state.change_state(State.RECEIVED_CATEGORY)
+        client_state_info.command.change_command(Commands.MAKE_INCOME)
+        self.client.send_message(client_information.chat_id, MESSAGE_ENTER_CATEGORY + str(categories))
+        return client_state_info
 
     def _category_processing(
-            self,
-            category: str,
-            state: StateMachine,
-            last_info: dict,
-            chat_id: int,
-            command: CommandsMachine,
-    ) -> tuple[StateMachine, dict, CommandsMachine]:
-
+            self, client_information: ClientInformation, client_state_info: ClientStateInfo) -> ClientStateInfo:
+        category = client_information.text
         categories = self.repository.get_categories()
         if category not in categories:
             raise WrongInputError(WRONG_INPUT_CATEGORY)
         else:
-            last_info['category'] = category
-            self.client.send_message(chat_id, MESSAGE_ENTER_DATE)
-            state.change_state(State.RECEIVED_DATE)
-            return state, last_info, command
+            client_state_info.last_info.category = category
+            client_state_info.state.change_state(State.RECEIVED_DATE)
+            self.client.send_message(client_information.chat_id, MESSAGE_ENTER_DATE)
+            return client_state_info
 
     def _date_processing(
-            self,
-            input_date: str,
-            state: StateMachine,
-            last_info: dict,
-            chat_id: int,
-            command: CommandsMachine,
-    ) -> tuple[StateMachine, dict, CommandsMachine]:
+            self, client_information: ClientInformation, client_state_info: ClientStateInfo) -> ClientStateInfo:
         try:
-            date = datetime.strptime(input_date, '%d-%m-%Y')
-            last_info['date'] = date
-            self.client.send_message(chat_id, MESSAGE_ENTER_AMOUNT)
-            state.change_state(State.RECEIVED_AMOUNT)
-            return state, last_info, command
+            date = datetime.strptime(client_information.text, '%d-%m-%Y')
+            client_state_info.last_info.date = date
+            client_state_info.state.change_state(State.RECEIVED_AMOUNT)
+            self.client.send_message(client_information.chat_id, MESSAGE_ENTER_AMOUNT)
+            return client_state_info
         except ValueError:
             raise WrongInputError(WRONG_INPUT_DATE)
 
     def _amount_processing(
-            self,
-            input_amount: str,
-            state: StateMachine,
-            last_info: dict,
-            chat_id: int,
-            command: CommandsMachine,
-    ) -> tuple[StateMachine, dict, CommandsMachine]:
+            self, client_information: ClientInformation, client_state_info: ClientStateInfo) -> ClientStateInfo:
         try:
-            amount = float(input_amount)
-            last_info['amount'] = amount
-            self.client.send_message(chat_id, MESSAGE_SUCCESS)
-            self.repository.save(last_info)
-            state.change_state(State.START)
-            command.change_command(Commands.NONE)
-            last_info = {}
-            return state, last_info, command
+            amount = float(client_information.text)
+            client_state_info.last_info.amount = amount
+            client_state_info.state.change_state(State.START)
+            client_state_info.command.change_command(Commands.NONE)
+
+            self.repository.save(client_state_info.last_info)
+            # date = client_state_info.last_info.date.strftime('%d-%m-%Y')
+            message = SAVED_RECORD.format(
+                category=client_state_info.last_info.category,
+                date=client_state_info.last_info.date.strftime('%d-%m-%Y'),
+                amount=client_state_info.last_info.amount
+            )
+            self.client.send_message(client_information.chat_id, message)
+
+            return client_state_info
         except ValueError:
             raise WrongInputError(WRONG_INPUT_AMOUNT)
 
     def make_income(
-            self,
-            text: str,
-            state: StateMachine,
-            last_info: dict,
-            chat_id: int,
-            command: CommandsMachine,
-    ) -> tuple[StateMachine, dict, CommandsMachine]:
-        text = text.lower().strip()
+            self, client_information: ClientInformation, client_state_info: ClientStateInfo) -> ClientStateInfo:
+        state = client_state_info.state
         if state.current_state == State.START:
-            output = self._start_processing(state, last_info, chat_id, command)
+            output = self._start_processing(client_information, client_state_info)
             return output
         elif state.current_state == State.RECEIVED_CATEGORY:
-            output = self._category_processing(text, state, last_info, chat_id, command)
+            output = self._category_processing(client_information, client_state_info)
             return output
         elif state.current_state == State.RECEIVED_DATE:
-            output = self._date_processing(text, state, last_info, chat_id, command)
+            output = self._date_processing(client_information, client_state_info)
             return output
         elif state.current_state == State.RECEIVED_AMOUNT:
-            output = self._amount_processing(text, state, last_info, chat_id, command)
+            output = self._amount_processing(client_information, client_state_info)
             return output
