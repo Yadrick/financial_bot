@@ -11,7 +11,6 @@ from ..config.config import (
     MESSAGE_ENTER_DATE,
     MESSAGE_ENTER_CATEGORY,
     MESSAGE_ENTER_AMOUNT,
-    WRONG_INPUT_CATEGORY,
     WRONG_INPUT_DATE,
     WRONG_INPUT_AMOUNT,
     SAVED_RECORD,
@@ -42,15 +41,11 @@ class MakeIncomeService:
     def _category_processing(
         self, client_information: ClientInformation, client_state_info: ClientStateInfo
     ) -> ClientStateInfo:
-        category = client_information.text
-        categories = self.repository.get_categories()
-        if category not in categories:
-            raise WrongInputError(WRONG_INPUT_CATEGORY)
-        else:
-            client_state_info.last_info.category = category
-            client_state_info.state.change_state(State.RECEIVED_DATE)
-            self.client.send_message(client_information.chat_id, MESSAGE_ENTER_DATE)
-            return client_state_info
+        category = client_information.text.capitalize()
+        client_state_info.last_info.category = category
+        client_state_info.state.change_state(State.RECEIVED_DATE)
+        self.client.send_message(client_information.chat_id, MESSAGE_ENTER_DATE)
+        return client_state_info
 
     def _date_processing(
         self, client_information: ClientInformation, client_state_info: ClientStateInfo
@@ -74,7 +69,6 @@ class MakeIncomeService:
             client_state_info.command.change_command(Commands.NONE)
 
             self.repository.save(client_state_info.last_info)
-            # date = client_state_info.last_info.date.strftime('%d-%m-%Y')
             message = SAVED_RECORD.format(
                 category=client_state_info.last_info.category,
                 date=client_state_info.last_info.date.strftime("%d-%m-%Y"),

@@ -1,5 +1,5 @@
 from .categories import Categories
-from ..app.machine_state import ClientLastInfo
+from ..app.client_info import ClientLastInfo
 from ..repository.interface import BaseRepository
 
 
