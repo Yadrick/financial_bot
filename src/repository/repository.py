@@ -1,3 +1,5 @@
+from .categories import Categories
+from ..app.client_info import ClientLastInfo
 from ..repository.interface import BaseRepository
 
 
@@ -8,8 +10,8 @@ class PostgreSQLRepository(BaseRepository):
     def __init__(self):
         pass
 
-    def save(self, last_info: dict):
+    def save(self, last_info: ClientLastInfo):
         pass
 
-    def get_categories(self) -> list[str]:
-        return ['продукты', 'кафе', 'налоги']
+    def get_categories(self) -> Categories:
+        return Categories(['Продукты', 'Кафе', 'Налоги'])

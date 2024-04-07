@@ -12,6 +12,7 @@ class StateMachine:
     """
     Class for storing and updating client state
     """
+
     def __init__(self):
         self.current_state = State.START
 
