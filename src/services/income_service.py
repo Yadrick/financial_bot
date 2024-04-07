@@ -13,7 +13,8 @@ from ..config.config import (
     MESSAGE_ENTER_AMOUNT,
     WRONG_INPUT_CATEGORY,
     WRONG_INPUT_DATE,
-    WRONG_INPUT_AMOUNT, SAVED_RECORD,
+    WRONG_INPUT_AMOUNT,
+    SAVED_RECORD,
 )
 
 
@@ -27,16 +28,20 @@ class MakeIncomeService:
         self.repository = repository
 
     def _start_processing(
-            self, client_information: ClientInformation, client_state_info: ClientStateInfo
+        self, client_information: ClientInformation, client_state_info: ClientStateInfo
     ) -> ClientStateInfo:
         categories = self.repository.get_categories()
         client_state_info.state.change_state(State.RECEIVED_CATEGORY)
         client_state_info.command.change_command(Commands.MAKE_INCOME)
-        self.client.send_message(client_information.chat_id, MESSAGE_ENTER_CATEGORY + str(categories))
+        client_state_info.last_info.chat_id = client_information.chat_id
+        self.client.send_message(
+            client_information.chat_id, MESSAGE_ENTER_CATEGORY + str(categories)
+        )
         return client_state_info
 
     def _category_processing(
-            self, client_information: ClientInformation, client_state_info: ClientStateInfo) -> ClientStateInfo:
+        self, client_information: ClientInformation, client_state_info: ClientStateInfo
+    ) -> ClientStateInfo:
         category = client_information.text
         categories = self.repository.get_categories()
         if category not in categories:
@@ -48,9 +53,10 @@ class MakeIncomeService:
             return client_state_info
 
     def _date_processing(
-            self, client_information: ClientInformation, client_state_info: ClientStateInfo) -> ClientStateInfo:
+        self, client_information: ClientInformation, client_state_info: ClientStateInfo
+    ) -> ClientStateInfo:
         try:
-            date = datetime.strptime(client_information.text, '%d-%m-%Y')
+            date = datetime.strptime(client_information.text, "%d-%m-%Y")
             client_state_info.last_info.date = date
             client_state_info.state.change_state(State.RECEIVED_AMOUNT)
             self.client.send_message(client_information.chat_id, MESSAGE_ENTER_AMOUNT)
@@ -59,7 +65,8 @@ class MakeIncomeService:
             raise WrongInputError(WRONG_INPUT_DATE)
 
     def _amount_processing(
-            self, client_information: ClientInformation, client_state_info: ClientStateInfo) -> ClientStateInfo:
+        self, client_information: ClientInformation, client_state_info: ClientStateInfo
+    ) -> ClientStateInfo:
         try:
             amount = float(client_information.text)
             client_state_info.last_info.amount = amount
@@ -70,8 +77,8 @@ class MakeIncomeService:
             # date = client_state_info.last_info.date.strftime('%d-%m-%Y')
             message = SAVED_RECORD.format(
                 category=client_state_info.last_info.category,
-                date=client_state_info.last_info.date.strftime('%d-%m-%Y'),
-                amount=client_state_info.last_info.amount
+                date=client_state_info.last_info.date.strftime("%d-%m-%Y"),
+                amount=client_state_info.last_info.amount,
             )
             self.client.send_message(client_information.chat_id, message)
 
@@ -80,7 +87,8 @@ class MakeIncomeService:
             raise WrongInputError(WRONG_INPUT_AMOUNT)
 
     def make_income(
-            self, client_information: ClientInformation, client_state_info: ClientStateInfo) -> ClientStateInfo:
+        self, client_information: ClientInformation, client_state_info: ClientStateInfo
+    ) -> ClientStateInfo:
         state = client_state_info.state
         if state.current_state == State.START:
             output = self._start_processing(client_information, client_state_info)

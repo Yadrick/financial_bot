@@ -17,6 +17,7 @@ class StateMachine:
     """
     Class for storing and updating client state
     """
+
     def __init__(self):
         self.current_state = State.START
 
@@ -30,6 +31,7 @@ class ClientLastInfo:
     date: Optional[datetime] = None
     amount: Optional[float] = None
     family: Optional[str] = None
+    chat_id: Optional[str] = None
 
 
 @dataclass
