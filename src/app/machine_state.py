@@ -1,4 +1,9 @@
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Optional
 from enum import Enum, auto
+
+from ..app.machine_commands import CommandsMachine
 
 
 class State(Enum):
@@ -17,3 +22,18 @@ class StateMachine:
 
     def change_state(self, new_state: State):
         self.current_state = new_state
+
+
+@dataclass
+class ClientLastInfo:
+    category: Optional[str] = None
+    date: Optional[datetime] = None
+    amount: Optional[float] = None
+    family: Optional[str] = None
+
+
+@dataclass
+class ClientStateInfo:
+    state: StateMachine
+    command: CommandsMachine
+    last_info: ClientLastInfo
