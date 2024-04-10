@@ -1,4 +1,5 @@
-from ..app.machine_state import StateMachine, ClientStateInfo, ClientLastInfo
+from ..app.machine_state import StateMachine
+from ..app.client_info import ClientStateInfo, ClientLastInfo
 from ..app.machine_commands import CommandsMachine, Commands
 from ..client.client import ClientInformation
 from ..client.interface import BaseClient
@@ -27,13 +28,13 @@ class Commander:
                     update["message"]["from"]["first_name"],
                     update["update_id"],
                     update["message"]["chat"]["id"],
-                    update["message"]["text"].strip(),
+                    update["message"]["text"].strip().lower(),
                 )
                 self.last_update_id = update["update_id"] + 1
                 try:
                     if client_information.chat_id not in clients.keys():
                         client_state_info = ClientStateInfo(
-                            StateMachine(), CommandsMachine(), ClientLastInfo()
+                            StateMachine(), CommandsMachine(), ClientLastInfo(client_information.chat_id)
                         )
                         clients[client_information.chat_id] = client_state_info
                     else:

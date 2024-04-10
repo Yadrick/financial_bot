@@ -1,5 +1,5 @@
 from .categories import Categories
-from ..app.machine_state import ClientLastInfo
+from ..app.client_info import ClientLastInfo
 from ..repository.interface import BaseRepository
 import psycopg2
 
@@ -30,7 +30,6 @@ INSERT INTO users (id, name) SELECT %s, %s WHERE NOT EXISTS (SELECT 1 FROM users
             cursor.close()
         except psycopg2.Error as e:
             print("Error:", e)
-            return None
 
     def save_category(self, last_info: ClientLastInfo, type_category: str):
         try:
@@ -51,7 +50,6 @@ INSERT INTO categories (name, type, user_id) SELECT %s, %s, %s WHERE NOT EXISTS 
             cursor.close()
         except psycopg2.Error as e:
             print("Error:", e)
-            return None
 
     def save_transaction(self, last_info: ClientLastInfo):
         try:
@@ -71,7 +69,6 @@ INSERT INTO categories (name, type, user_id) SELECT %s, %s, %s WHERE NOT EXISTS 
 
         except psycopg2.Error as e:
             print("Error:", e)
-            return None
 
     def get_categories(self, type_category: str, chat_id: str) -> Categories:
         """
