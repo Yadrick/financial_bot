@@ -17,7 +17,7 @@ class Commander:
         self.make_income_service = make_income_service
         self.last_update_id = 0
 
-    def manage(self, clients: dict[int: ClientStateInfo]):
+    def manage(self, clients: dict[int:ClientStateInfo]):
 
         updates = self.client.get_update(self.last_update_id)
 
@@ -44,16 +44,18 @@ class Commander:
                             client_information.chat_id, STARTING_MESSAGE
                         )
                     elif (
-                        client_information.text == "/make_income" or
-                        clients[client_information.chat_id].command.current_command == Commands.MAKE_INCOME
+                        client_information.text == "/make_income"
+                        or clients[client_information.chat_id].command.current_command
+                        == Commands.MAKE_INCOME
                     ):
                         client_state_info = self.make_income_service.make_income(
-                            client_information,
-                            client_state_info
+                            client_information, client_state_info
                         )
                         clients[client_information.chat_id] = client_state_info
                     else:
-                        self.client.send_message(client_information.chat_id, WRONG_INPUT)
+                        self.client.send_message(
+                            client_information.chat_id, WRONG_INPUT
+                        )
                 except BaseAppError as error:
                     self.client.send_message(client_information.chat_id, error.msg)
 
