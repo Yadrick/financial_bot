@@ -1,7 +1,7 @@
 import mock
 
 from financial_bot.src.repository.interface import BaseRepository
-from financial_bot.tests.fixture import client_information, client_state_info, categories
+from financial_bot.tests.fixture import client_information, client_state_info, categories # noqa
 from financial_bot.src.app.client_info import ClientStateInfo, ClientInformation
 from financial_bot.src.app.machine_commands import Commands
 from financial_bot.src.app.machine_state import State
