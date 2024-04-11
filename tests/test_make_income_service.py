@@ -11,9 +11,9 @@ from financial_bot.src.services.income_service import MakeIncomeService
 
 
 def test_start_processing(
-        client_information: ClientInformation,
-        client_state_info: ClientStateInfo,
-        categories: Categories
+        client_information: ClientInformation, # noqa
+        client_state_info: ClientStateInfo, # noqa
+        categories: Categories # noqa
 ):
     client = mock.create_autospec(BaseClient, instance=True)
     repository = mock.create_autospec(BaseRepository, instance=True)
