@@ -1,10 +1,9 @@
 from ..app.machine_state import StateMachine
-from ..app.client_info import ClientStateInfo, ClientLastInfo
 from ..app.machine_commands import CommandsMachine, Commands
-from ..client.client import ClientInformation
 from ..client.interface import BaseClient
 from ..errors.app_errors import BaseAppError
 from ..services.income_service import MakeIncomeService
+from ..app.client_info import ClientInformation, ClientStateInfo, ClientLastInfo
 from ..config.config import STARTING_MESSAGE, WRONG_INPUT
 
 

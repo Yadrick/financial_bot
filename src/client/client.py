@@ -1,17 +1,7 @@
 import requests
 
-from dataclasses import dataclass
-
 from ..client.interface import BaseClient
 from ..config.config import API_Link
-
-
-@dataclass
-class ClientInformation:
-    first_name: str
-    update_id: int
-    chat_id: int
-    text: str
 
 
 class TelegramClient(BaseClient):

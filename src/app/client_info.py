@@ -7,6 +7,14 @@ from ..app.machine_commands import CommandsMachine
 
 
 @dataclass
+class ClientInformation:
+    first_name: str
+    update_id: int
+    chat_id: int
+    text: str
+
+
+@dataclass
 class ClientLastInfo:
     """
     Class for storing user data information

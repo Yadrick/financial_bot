@@ -1,9 +1,8 @@
 from datetime import datetime
 
-from ..app.commander import ClientStateInfo
+from ..app.client_info import ClientStateInfo, ClientInformation
 from ..app.machine_state import State
 from ..app.machine_commands import Commands
-from ..client.client import ClientInformation
 from ..client.interface import BaseClient
 from ..errors.app_errors import WrongInputError
 from ..repository.interface import BaseRepository
