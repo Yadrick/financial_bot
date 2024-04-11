@@ -49,9 +49,7 @@ class MakeIncomeService:
         client_state_info.last_info.category = category
         client_state_info.state.change_state(State.RECEIVED_DATE)
         self.client.send_message(client_information.chat_id, MESSAGE_ENTER_DATE)
-        self.repository.save_category(
-            client_state_info.last_info, self.type_category
-        )
+        self.repository.save_category(client_state_info.last_info, self.type_category)
         return client_state_info
 
     def _date_processing(

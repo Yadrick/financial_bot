@@ -5,6 +5,7 @@ from ..client.client import ClientInformation
 from ..client.interface import BaseClient
 from ..errors.app_errors import BaseAppError
 from ..services.income_service import MakeIncomeService
+from src.services.expense_service import MakeExpenseService
 from ..config.config import STARTING_MESSAGE, WRONG_INPUT
 
 
@@ -13,9 +14,15 @@ class Commander:
     Class processes the received messages from the Telegram api and then launches the necessary services
     """
 
-    def __init__(self, client: BaseClient, make_income_service: MakeIncomeService):
+    def __init__(
+        self,
+        client: BaseClient,
+        make_income_service: MakeIncomeService,
+        make_expense_service: MakeExpenseService,
+    ):
         self.client = client
         self.make_income_service = make_income_service
+        self.make_expense_service = make_expense_service
         self.last_update_id = 0
 
     def manage(self, clients: dict[int:ClientStateInfo]):
@@ -34,7 +41,9 @@ class Commander:
                 try:
                     if client_information.chat_id not in clients.keys():
                         client_state_info = ClientStateInfo(
-                            StateMachine(), CommandsMachine(), ClientLastInfo(client_information.chat_id)
+                            StateMachine(),
+                            CommandsMachine(),
+                            ClientLastInfo(client_information.chat_id),
                         )
                         clients[client_information.chat_id] = client_state_info
                     else:
@@ -50,6 +59,15 @@ class Commander:
                         == Commands.MAKE_INCOME
                     ):
                         client_state_info = self.make_income_service.make_income(
+                            client_information, client_state_info
+                        )
+                        clients[client_information.chat_id] = client_state_info
+                    elif (
+                        client_information.text == "/make_expense"
+                        or clients[client_information.chat_id].command.current_command
+                        == Commands.MAKE_EXPENSE
+                    ):
+                        client_state_info = self.make_expense_service.make_expense(
                             client_information, client_state_info
                         )
                         clients[client_information.chat_id] = client_state_info
