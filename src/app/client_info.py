@@ -11,7 +11,9 @@ class ClientLastInfo:
     """
     Class for storing user data information
     """
+
     chat_id: int
+    name: Optional[str] = None
     category: Optional[str] = None
     date: Optional[datetime] = None
     amount: Optional[float] = None
@@ -23,6 +25,7 @@ class ClientStateInfo:
     """
     Class for storing information about the status of the process of receiving data from the user
     """
+
     state: StateMachine
     command: CommandsMachine
     last_info: ClientLastInfo

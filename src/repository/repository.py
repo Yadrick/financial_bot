@@ -22,7 +22,7 @@ INSERT INTO users (id, name) SELECT %s, %s WHERE NOT EXISTS (SELECT 1 FROM users
                 query_users,
                 (
                     last_info.chat_id,
-                    None,
+                    last_info.name,
                     last_info.chat_id,
                 ),
             )

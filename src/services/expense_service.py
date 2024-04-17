@@ -32,6 +32,7 @@ class MakeExpenseService:
         client_state_info.state.change_state(State.RECEIVED_CATEGORY)
         client_state_info.command.change_command(Commands.MAKE_EXPENSE)
         client_state_info.last_info.chat_id = client_information.chat_id
+        client_state_info.last_info.name = client_information.first_name
         categories = self.repository.get_categories(
             self.type_category, client_state_info.last_info.chat_id
         )
