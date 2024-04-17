@@ -4,6 +4,7 @@ from src.config.config import API_token
 from src.client.client import TelegramClient
 from src.services.income_service import MakeIncomeService
 from src.services.expense_service import MakeExpenseService
+from src.services.category_service import CategoryActionsService
 from src.repository.repository import PostgreSQLRepository
 
 import psycopg2
@@ -28,7 +29,10 @@ def main():
         repository = PostgreSQLRepository(conn)
         make_income_service = MakeIncomeService(client, repository)
         make_expense_service = MakeExpenseService(client, repository)
-        commander = Commander(client, make_income_service, make_expense_service)
+        category_service = CategoryActionsService(client, repository)
+        commander = Commander(
+            client, make_income_service, make_expense_service, category_service
+        )
 
         app = TelegramBotApp(commander)
         app.start()

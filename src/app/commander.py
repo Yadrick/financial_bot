@@ -5,6 +5,7 @@ from ..client.client import ClientInformation
 from ..client.interface import BaseClient
 from ..errors.app_errors import BaseAppError
 from ..services.income_service import MakeIncomeService
+from ..services.category_service import CategoryActionsService
 from src.services.expense_service import MakeExpenseService
 from ..config.config import STARTING_MESSAGE, WRONG_INPUT
 
@@ -19,10 +20,12 @@ class Commander:
         client: BaseClient,
         make_income_service: MakeIncomeService,
         make_expense_service: MakeExpenseService,
+        category_service: CategoryActionsService,
     ):
         self.client = client
         self.make_income_service = make_income_service
         self.make_expense_service = make_expense_service
+        self.category_service = category_service
         self.last_update_id = 0
 
     def manage(self, clients: dict[int:ClientStateInfo]):
@@ -69,6 +72,18 @@ class Commander:
                     ):
                         client_state_info = self.make_expense_service.make_expense(
                             client_information, client_state_info
+                        )
+                        clients[client_information.chat_id] = client_state_info
+                    elif client_information.text == "/get_income_categories":
+                        client_state_info = self.category_service.get_income_categories(
+                            client_information, client_state_info
+                        )
+                        clients[client_information.chat_id] = client_state_info
+                    elif client_information.text == "/get_expense_categories":
+                        client_state_info = (
+                            self.category_service.get_expense_categories(
+                                client_information, client_state_info
+                            )
                         )
                         clients[client_information.chat_id] = client_state_info
                     else:
