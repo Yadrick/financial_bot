@@ -1,13 +1,14 @@
 from ..app.machine_state import StateMachine
 from ..app.client_info import ClientStateInfo, ClientLastInfo
 from ..app.machine_commands import CommandsMachine, Commands
+from ..app.machine_state import State
 from ..client.client import ClientInformation
 from ..client.interface import BaseClient
 from ..errors.app_errors import BaseAppError
 from ..services.income_service import MakeIncomeService
 from ..services.category_service import CategoryActionsService
 from src.services.expense_service import MakeExpenseService
-from ..config.config import STARTING_MESSAGE, WRONG_INPUT
+from ..config.config import STARTING_MESSAGE, WRONG_INPUT, CANCEL_MESSAGE
 
 
 class Commander:
@@ -53,8 +54,22 @@ class Commander:
                         client_state_info = clients[client_information.chat_id]
 
                     if client_information.text in ("/start", "/help"):
+                        client_state_info.state.change_state(State.START)
+                        client_state_info.command.change_command(Commands.NONE)
+                        client_state_info.last_info = ClientLastInfo(
+                            client_information.chat_id
+                        )
                         self.client.send_message(
                             client_information.chat_id, STARTING_MESSAGE
+                        )
+                    elif client_information.text in ("/cancel", "/stop"):
+                        client_state_info.state.change_state(State.START)
+                        client_state_info.command.change_command(Commands.NONE)
+                        client_state_info.last_info = ClientLastInfo(
+                            client_information.chat_id
+                        )
+                        self.client.send_message(
+                            client_information.chat_id, CANCEL_MESSAGE
                         )
                     elif (
                         client_information.text == "/make_income"
