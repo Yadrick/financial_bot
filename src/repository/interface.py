@@ -17,3 +17,6 @@ class BaseRepository(Protocol):
 
     def get_categories(self, type_category: str, chat_id: str) -> Categories:
         raise NotImplementedError
+
+    def delete_category_and_related_transactions(self, last_info: ClientLastInfo):
+        raise NotImplementedError
