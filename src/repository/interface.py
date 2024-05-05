@@ -12,7 +12,7 @@ class BaseRepository(Protocol):
     def save_category(self, last_info: ClientLastInfo, type_category: str):
         raise NotImplementedError
 
-    def save_transaction(self, last_info: ClientLastInfo):
+    def save_transaction(self, last_info: ClientLastInfo, type_category: str):
         raise NotImplementedError
 
     def get_categories(self, type_category: str, chat_id: str) -> Categories:

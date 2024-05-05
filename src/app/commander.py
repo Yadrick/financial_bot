@@ -19,13 +19,13 @@ class Commander:
     def __init__(
         self,
         client: BaseClient,
-        make_income_service: MakeIncomeService,
-        make_expense_service: MakeExpenseService,
+        income_service: MakeIncomeService,
+        expense_service: MakeExpenseService,
         category_service: CategoryActionsService,
     ):
         self.client = client
-        self.make_income_service = make_income_service
-        self.make_expense_service = make_expense_service
+        self.income_service = income_service
+        self.expense_service = expense_service
         self.category_service = category_service
         self.last_update_id = 0
 
@@ -76,7 +76,7 @@ class Commander:
                         or clients[client_information.chat_id].command.current_command
                         == Commands.MAKE_INCOME
                     ):
-                        client_state_info = self.make_income_service.make_income(
+                        client_state_info = self.income_service.make_income(
                             client_information, client_state_info
                         )
                         clients[client_information.chat_id] = client_state_info
@@ -85,7 +85,7 @@ class Commander:
                         or clients[client_information.chat_id].command.current_command
                         == Commands.MAKE_EXPENSE
                     ):
-                        client_state_info = self.make_expense_service.make_expense(
+                        client_state_info = self.expense_service.make_expense(
                             client_information, client_state_info
                         )
                         clients[client_information.chat_id] = client_state_info
@@ -97,6 +97,28 @@ class Commander:
                     elif client_information.text == "/get_expense_categories":
                         client_state_info = (
                             self.category_service.get_expense_categories(
+                                client_information, client_state_info
+                            )
+                        )
+                        clients[client_information.chat_id] = client_state_info
+                    elif (
+                        client_information.text == "/delete_income_categories"
+                        or clients[client_information.chat_id].command.current_command
+                        == Commands.DELETE_INCOME_CATEGORIES
+                    ):
+                        client_state_info = (
+                            self.income_service.delete_income_categories(
+                                client_information, client_state_info
+                            )
+                        )
+                        clients[client_information.chat_id] = client_state_info
+                    elif (
+                        client_information.text == "/delete_expense_categories"
+                        or clients[client_information.chat_id].command.current_command
+                        == Commands.DELETE_EXPENSE_CATEGORIES
+                    ):
+                        client_state_info = (
+                            self.expense_service.delete_expense_categories(
                                 client_information, client_state_info
                             )
                         )

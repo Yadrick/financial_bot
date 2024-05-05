@@ -14,6 +14,10 @@ from ..config.config import (
     WRONG_INPUT_DATE,
     WRONG_INPUT_AMOUNT,
     SAVED_RECORD,
+    DELETE_INCOME_CATEGORY_MESSAGE,
+    CATEGORY_SUCCESSFULLY_DELETED,
+    CATEGORY_NOT_DELETED,
+    CATEGORIES_NOT_FOUND,
 )
 
 
@@ -74,7 +78,9 @@ class MakeIncomeService:
             client_state_info.state.change_state(State.START)
             client_state_info.command.change_command(Commands.NONE)
 
-            self.repository.save_transaction(client_state_info.last_info)
+            self.repository.save_transaction(
+                client_state_info.last_info, self.type_category
+            )
             message = SAVED_RECORD.format(
                 category=client_state_info.last_info.category,
                 date=client_state_info.last_info.date.strftime("%d-%m-%Y"),
@@ -102,3 +108,45 @@ class MakeIncomeService:
         elif state.current_state == State.RECEIVED_AMOUNT:
             output = self._amount_processing(client_information, client_state_info)
             return output
+
+    def delete_income_categories(
+        self, client_information: ClientInformation, client_state_info: ClientStateInfo
+    ):
+        state = client_state_info.state
+        if state.current_state == State.START:
+            client_state_info.last_info.chat_id = client_information.chat_id
+            categories = self.repository.get_categories(
+                "income", client_state_info.last_info.chat_id
+            )
+            if categories:
+                client_state_info.state.change_state(State.WHAITING_CATEGORY)
+                client_state_info.command.change_command(
+                    Commands.DELETE_INCOME_CATEGORIES
+                )
+                self.client.send_message(
+                    client_information.chat_id,
+                    DELETE_INCOME_CATEGORY_MESSAGE + str(categories),
+                )
+            else:
+                self.client.send_message(
+                    client_information.chat_id,
+                    CATEGORIES_NOT_FOUND,
+                )
+            return client_state_info
+        elif state.current_state == State.WHAITING_CATEGORY:
+            category = client_information.text.capitalize()
+            client_state_info.last_info.category = category
+            result = self.repository.delete_category_and_related_transactions(
+                client_state_info.last_info, self.type_category
+            )
+            if result:
+                client_state_info.state.change_state(State.START)
+                client_state_info.command.change_command(Commands.NONE)
+                self.client.send_message(
+                    client_information.chat_id, CATEGORY_SUCCESSFULLY_DELETED
+                )
+            else:
+                self.client.send_message(
+                    client_information.chat_id, CATEGORY_NOT_DELETED
+                )
+            return client_state_info
