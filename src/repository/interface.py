@@ -1,7 +1,7 @@
 from typing import Protocol
 
 from .categories import Categories
-from ..app.commander import ClientLastInfo
+from ..app.client_info import ClientLastInfo
 
 
 class BaseRepository(Protocol):
