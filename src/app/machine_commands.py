@@ -22,5 +22,5 @@ class CommandsMachine:
     def __init__(self):
         self.current_command = Commands.NONE
 
-    def change_command(self, new_comand: Commands):
-        self.current_command = new_comand
+    def change_command(self, new_command: Commands):
+        self.current_command = new_command
