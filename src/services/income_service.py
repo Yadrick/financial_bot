@@ -24,17 +24,21 @@ class MakeIncomeService:
     def __init__(self, client: BaseClient, repository: BaseRepository):
         self.client = client
         self.repository = repository
+        self.type_category = "income"
 
     def _start_processing(
         self, client_information: ClientInformation, client_state_info: ClientStateInfo
     ) -> ClientStateInfo:
-        categories = self.repository.get_categories()
         client_state_info.state.change_state(State.RECEIVED_CATEGORY)
         client_state_info.command.change_command(Commands.MAKE_INCOME)
         client_state_info.last_info.chat_id = client_information.chat_id
+        categories = self.repository.get_categories(
+            self.type_category, client_state_info.last_info.chat_id
+        )
         self.client.send_message(
             client_information.chat_id, MESSAGE_ENTER_CATEGORY + str(categories)
         )
+        self.repository.save_user(client_state_info.last_info)
         return client_state_info
 
     def _category_processing(
@@ -44,6 +48,7 @@ class MakeIncomeService:
         client_state_info.last_info.category = category
         client_state_info.state.change_state(State.RECEIVED_DATE)
         self.client.send_message(client_information.chat_id, MESSAGE_ENTER_DATE)
+        self.repository.save_category(client_state_info.last_info, self.type_category)
         return client_state_info
 
     def _date_processing(
@@ -67,7 +72,7 @@ class MakeIncomeService:
             client_state_info.state.change_state(State.START)
             client_state_info.command.change_command(Commands.NONE)
 
-            self.repository.save(client_state_info.last_info)
+            self.repository.save_transaction(client_state_info.last_info)
             message = SAVED_RECORD.format(
                 category=client_state_info.last_info.category,
                 date=client_state_info.last_info.date.strftime("%d-%m-%Y"),
