@@ -118,7 +118,7 @@ class MakeIncomeService:
                 "income", client_state_info.last_info.chat_id
             )
             if categories:
-                client_state_info.state.change_state(State.WHAITING_CATEGORY)
+                client_state_info.state.change_state(State.WAITING_CATEGORY)
                 client_state_info.command.change_command(
                     Commands.DELETE_INCOME_CATEGORIES
                 )
@@ -132,7 +132,7 @@ class MakeIncomeService:
                     CATEGORIES_NOT_FOUND,
                 )
             return client_state_info
-        elif state.current_state == State.WHAITING_CATEGORY:
+        elif state.current_state == State.WAITING_CATEGORY:
             category = client_information.text.capitalize()
             client_state_info.last_info.category = category
             result = self.repository.delete_category_and_related_transactions(

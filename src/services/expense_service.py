@@ -1,8 +1,7 @@
 from ..app.machine_state import State
 from ..app.machine_commands import Commands
 from ..client.interface import BaseClient
-from ..client.client import ClientInformation
-from ..app.commander import ClientStateInfo
+from ..app.client_info import ClientStateInfo, ClientInformation
 from ..repository.interface import BaseRepository
 from ..config.config import (
     MESSAGE_ENTER_DATE,
@@ -117,7 +116,7 @@ class MakeExpenseService:
                 self.type_category, client_state_info.last_info.chat_id
             )
             if categories:
-                client_state_info.state.change_state(State.WHAITING_CATEGORY)
+                client_state_info.state.change_state(State.WAITING_CATEGORY)
                 client_state_info.command.change_command(
                     Commands.DELETE_EXPENSE_CATEGORIES
                 )
@@ -131,7 +130,7 @@ class MakeExpenseService:
                     CATEGORIES_NOT_FOUND,
                 )
             return client_state_info
-        elif state.current_state == State.WHAITING_CATEGORY:
+        elif state.current_state == State.WAITING_CATEGORY:
             category = client_information.text.capitalize()
             client_state_info.last_info.category = category
             result = self.repository.delete_category_and_related_transactions(

@@ -1,7 +1,8 @@
+import psycopg
+
 from .categories import Categories
 from ..app.client_info import ClientLastInfo
 from ..repository.interface import BaseRepository
-import psycopg
 
 
 class PostgreSQLRepository(BaseRepository):
@@ -78,7 +79,7 @@ INSERT INTO categories (name, type, user_id) SELECT %s, %s, %s WHERE NOT EXISTS 
             self.connect.commit()
             cursor.close()
 
-    def get_categories(self, type_category: str, chat_id: str) -> Categories:
+    def get_categories(self, type_category: str, chat_id: int) -> Categories:
         """
         type_category: income or expense
         """
@@ -126,7 +127,7 @@ INSERT INTO categories (name, type, user_id) SELECT %s, %s, %s WHERE NOT EXISTS 
                 )
                 cursor.execute(
                     query_delete_category,
-                    (category_id),
+                    category_id,
                 )
             return category_id
 

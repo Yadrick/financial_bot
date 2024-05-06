@@ -6,7 +6,7 @@ class State(Enum):
     RECEIVED_CATEGORY = auto()
     RECEIVED_DATE = auto()
     RECEIVED_AMOUNT = auto()
-    WHAITING_CATEGORY = auto()
+    WAITING_CATEGORY = auto()
 
 
 class StateMachine:

@@ -12,5 +12,7 @@ services:
       - .env.local
     volumes:
       - postgres_prod_volume:/var/lib/postgresql/data
+    command:
+      -p "6432"
     ports:
-      - "${PG_PORT}:5432"
+      - "${PG_PORT}:6432"
