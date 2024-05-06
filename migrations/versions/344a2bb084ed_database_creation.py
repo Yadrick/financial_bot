@@ -40,9 +40,10 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("date", sa.Date(), nullable=False),
         sa.Column("amount_money", sa.Numeric(), nullable=False),
-        sa.Column("category_name", sa.String(), nullable=False),
+        sa.Column("category_id", sa.Integer(), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"]),
+        sa.ForeignKeyConstraint(["category_id"], ["categories.id"]),
         sa.PrimaryKeyConstraint("id"),
     )
 

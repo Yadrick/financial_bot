@@ -11,6 +11,10 @@ from ..config.config import (
     WRONG_INPUT_DATE,
     SAVED_RECORD,
     WRONG_INPUT_AMOUNT,
+    DELETE_EXPENSE_CATEGORY_MESSAGE,
+    CATEGORIES_NOT_FOUND,
+    CATEGORY_SUCCESSFULLY_DELETED,
+    CATEGORY_NOT_DELETED,
 )
 from datetime import datetime
 from ..errors.app_errors import WrongInputError
@@ -32,6 +36,7 @@ class MakeExpenseService:
         client_state_info.state.change_state(State.RECEIVED_CATEGORY)
         client_state_info.command.change_command(Commands.MAKE_EXPENSE)
         client_state_info.last_info.chat_id = client_information.chat_id
+        client_state_info.last_info.name = client_information.first_name
         categories = self.repository.get_categories(
             self.type_category, client_state_info.last_info.chat_id
         )
@@ -72,7 +77,9 @@ class MakeExpenseService:
             client_state_info.state.change_state(State.START)
             client_state_info.command.change_command(Commands.NONE)
 
-            self.repository.save_transaction(client_state_info.last_info)
+            self.repository.save_transaction(
+                client_state_info.last_info, self.type_category
+            )
             message = SAVED_RECORD.format(
                 category=client_state_info.last_info.category,
                 date=client_state_info.last_info.date.strftime("%d-%m-%Y"),
@@ -99,3 +106,45 @@ class MakeExpenseService:
         elif state.current_state == State.RECEIVED_AMOUNT:
             output = self._amount_processing(client_information, client_state_info)
             return output
+
+    def delete_expense_categories(
+        self, client_information: ClientInformation, client_state_info: ClientStateInfo
+    ):
+        state = client_state_info.state
+        if state.current_state == State.START:
+            client_state_info.last_info.chat_id = client_information.chat_id
+            categories = self.repository.get_categories(
+                self.type_category, client_state_info.last_info.chat_id
+            )
+            if categories:
+                client_state_info.state.change_state(State.WHAITING_CATEGORY)
+                client_state_info.command.change_command(
+                    Commands.DELETE_EXPENSE_CATEGORIES
+                )
+                self.client.send_message(
+                    client_information.chat_id,
+                    DELETE_EXPENSE_CATEGORY_MESSAGE + str(categories),
+                )
+            else:
+                self.client.send_message(
+                    client_information.chat_id,
+                    CATEGORIES_NOT_FOUND,
+                )
+            return client_state_info
+        elif state.current_state == State.WHAITING_CATEGORY:
+            category = client_information.text.capitalize()
+            client_state_info.last_info.category = category
+            result = self.repository.delete_category_and_related_transactions(
+                client_state_info.last_info, self.type_category
+            )
+            if result:
+                client_state_info.state.change_state(State.START)
+                client_state_info.command.change_command(Commands.NONE)
+                self.client.send_message(
+                    client_information.chat_id, CATEGORY_SUCCESSFULLY_DELETED
+                )
+            else:
+                self.client.send_message(
+                    client_information.chat_id, CATEGORY_NOT_DELETED
+                )
+            return client_state_info
