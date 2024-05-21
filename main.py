@@ -1,15 +1,18 @@
+import os
+import psycopg
+
+from dotenv import load_dotenv
+
 from src.app.app import TelegramBotApp
-from src.app.commander import Commander
 from src.config.config import API_token
 from src.client.client import TelegramClient
+from src.app.event_processor import EventProcessor
+from src.app.update_consumer import UpdatesConsumer
 from src.services.income_service import MakeIncomeService
+from src.repository.repository import PostgreSQLRepository
 from src.services.expense_service import MakeExpenseService
 from src.services.category_service import CategoryActionsService
-from src.repository.repository import PostgreSQLRepository
 
-import psycopg
-import os
-from dotenv import load_dotenv
 
 load_dotenv(".env.local")
 
@@ -24,17 +27,17 @@ conn_string = f"host={pg_host} port={pg_port} dbname={pg_db} user={pg_user} pass
 
 def main():
     try:
-        conn = psycopg.connect(conn_string)
+        conn = psycopg.connect(conn_string)  # TODO: use outside 'try'?
         client = TelegramClient(API_token)
         repository = PostgreSQLRepository(conn)
         make_income_service = MakeIncomeService(client, repository)
         make_expense_service = MakeExpenseService(client, repository)
         category_service = CategoryActionsService(client, repository)
-        commander = Commander(
-            client, make_income_service, make_expense_service, category_service
-        )
+        event_processor = EventProcessor(
+            client, make_income_service, make_expense_service, category_service)
+        updates_consumer = UpdatesConsumer(client, event_processor)
+        app = TelegramBotApp(updates_consumer)
 
-        app = TelegramBotApp(commander)
         app.start()
     except Exception as ex:
         print(f"Error in main: {ex}")

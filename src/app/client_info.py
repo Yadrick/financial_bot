@@ -7,15 +7,16 @@ from ..app.machine_commands import CommandsMachine
 
 
 @dataclass
-class ClientInformation:
+class UserInformation:
     first_name: str
     update_id: int
     chat_id: int
     text: str
+    # TODO: поле command
 
 
 @dataclass
-class ClientLastInfo:
+class UserLastInfo:
     """
     Class for storing user data information
     """
@@ -29,11 +30,11 @@ class ClientLastInfo:
 
 
 @dataclass
-class ClientStateInfo:
+class UserStateInfo:
     """
     Class for storing information about the status of the process of receiving data from the user
     """
 
     state: StateMachine
     command: CommandsMachine
-    last_info: ClientLastInfo
+    last_info: UserLastInfo

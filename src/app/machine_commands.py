@@ -24,3 +24,5 @@ class CommandsMachine:
 
     def change_command(self, new_command: Commands):
         self.current_command = new_command
+
+    # TODO: get_command():

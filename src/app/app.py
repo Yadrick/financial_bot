@@ -1,14 +1,14 @@
-from ..app.commander import Commander
+from .update_consumer import UpdatesConsumer
 
 
 class TelegramBotApp:
     """
     Class to launch the bot
     """
-    def __init__(self, commander: Commander):
-        self.commander = commander
+    def __init__(self, updates_consumer: UpdatesConsumer):
+        self.updates_consumer = updates_consumer
 
     def start(self):
-        clients = {}
+        users = {}
         while True:
-            clients = self.commander.manage(clients)
+            users = self.updates_consumer.update_consumer(users)
