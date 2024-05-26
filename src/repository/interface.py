@@ -6,13 +6,10 @@ from ..app.client_info import ClientLastInfo
 
 class BaseRepository(Protocol):
 
+    def save(self, last_info: ClientLastInfo, type_category: str):
+        raise NotImplementedError
+
     def save_user(self, last_info: ClientLastInfo):
-        raise NotImplementedError
-
-    def save_category(self, last_info: ClientLastInfo, type_category: str):
-        raise NotImplementedError
-
-    def save_transaction(self, last_info: ClientLastInfo, type_category: str):
         raise NotImplementedError
 
     def get_categories(self, type_category: str, chat_id: str) -> Categories:
