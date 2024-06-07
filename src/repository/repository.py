@@ -1,6 +1,7 @@
 from .categories import Categories
 from ..app.client_info import ClientLastInfo
 from ..repository.interface import BaseRepository
+from datetime import date
 import psycopg
 
 
@@ -141,3 +142,30 @@ INSERT INTO users (id, name) SELECT %s, %s WHERE NOT EXISTS (SELECT 1 FROM users
         finally:
             self.connect.commit()
             cursor.close()
+
+    def report_per_day(self, chat_id: str):
+        try:
+            cursor = self.connect.cursor()
+            transactions_date = date.today()
+            print(transactions_date)
+            query = """
+        SELECT categories.type, SUM(transactions.amount_money)
+        FROM transactions
+        JOIN categories ON transactions.category_id = categories.id
+        WHERE transactions.user_id = %s AND transactions.date = %s
+        GROUP BY categories.type
+    """
+            cursor.execute(
+                query,
+                (chat_id, transactions_date),
+            )
+            result = cursor.fetchall()
+            return result
+        except psycopg.Error as e:
+            print("Error:", e)
+            return None
+        finally:
+            cursor.close()
+
+    def report_per_month(self, chat_id: str):
+        pass

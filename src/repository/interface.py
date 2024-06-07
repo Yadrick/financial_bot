@@ -17,3 +17,9 @@ class BaseRepository(Protocol):
 
     def delete_category_and_related_transactions(self, last_info: ClientLastInfo):
         raise NotImplementedError
+
+    def report_per_day(self, chat_id: str):
+        raise NotImplementedError
+
+    def report_per_month(self, chat_id: str):
+        raise NotImplementedError

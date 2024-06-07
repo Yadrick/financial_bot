@@ -6,6 +6,7 @@ from ..errors.app_errors import BaseAppError
 from ..services.income_service import MakeIncomeService
 from ..services.expense_service import MakeExpenseService
 from ..services.category_service import CategoryActionsService
+from ..services.personal_report_service import ReportService
 from ..config.config import STARTING_MESSAGE, WRONG_INPUT, CANCEL_MESSAGE
 from ..app.client_info import ClientInformation, ClientStateInfo, ClientLastInfo
 
@@ -21,14 +22,16 @@ class Commander:
         income_service: MakeIncomeService,
         expense_service: MakeExpenseService,
         category_service: CategoryActionsService,
+        personal_report_service: ReportService,
     ):
         self.client = client
         self.income_service = income_service
         self.expense_service = expense_service
         self.category_service = category_service
+        self.personal_report_service = personal_report_service
         self.last_update_id = 0
 
-    def manage(self, clients: dict[int: ClientStateInfo]):
+    def manage(self, clients: dict[int:ClientStateInfo]):
 
         updates = self.client.get_update(self.last_update_id)
 
@@ -44,7 +47,9 @@ class Commander:
                 try:
                     if client_information.chat_id not in clients.keys():
                         client_state_info = ClientStateInfo(
-                            StateMachine(), CommandsMachine(), ClientLastInfo(client_information.chat_id)
+                            StateMachine(),
+                            CommandsMachine(),
+                            ClientLastInfo(client_information.chat_id),
                         )
                         clients[client_information.chat_id] = client_state_info
                     else:
@@ -69,8 +74,9 @@ class Commander:
                             client_information.chat_id, CANCEL_MESSAGE
                         )
                     elif (
-                        client_information.text == "/make_income" or
-                        clients[client_information.chat_id].command.current_command == Commands.MAKE_INCOME
+                        client_information.text == "/make_income"
+                        or clients[client_information.chat_id].command.current_command
+                        == Commands.MAKE_INCOME
                     ):
                         client_state_info = self.income_service.make_income(
                             client_information, client_state_info
@@ -119,8 +125,19 @@ class Commander:
                             )
                         )
                         clients[client_information.chat_id] = client_state_info
+                    elif (
+                        client_information.text == "/report_per_day"
+                        or clients[client_information.chat_id].command.current_command
+                        == Commands.REPORT_PER_DAY
+                    ):
+                        client_state_info = self.personal_report_service.report_per_day(
+                            client_information, client_state_info
+                        )
+                        clients[client_information.chat_id] = client_state_info
                     else:
-                        self.client.send_message(client_information.chat_id, WRONG_INPUT)
+                        self.client.send_message(
+                            client_information.chat_id, WRONG_INPUT
+                        )
                 except BaseAppError as error:
                     self.client.send_message(client_information.chat_id, error.msg)
 

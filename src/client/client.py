@@ -8,6 +8,7 @@ class TelegramClient(BaseClient):
     """
     Class to communicate with the telegram api
     """
+
     def __init__(self, api_token: str):
         self.api_token = api_token
 
@@ -26,3 +27,11 @@ class TelegramClient(BaseClient):
         data = {"chat_id": str(chat_id), "text": text}
         response = requests.post(url, data=data)
         return response.json()
+
+    def send_photo(self, chat_id: int, photo_path):
+        with open(photo_path, "rb") as photo_file:
+            url = API_Link.format(API_token=self.api_token) + "sendPhoto"
+            data = {"chat_id": str(chat_id)}
+            files = {"photo": photo_file}
+            response = requests.post(url, files=files, data=data)
+            return response.json()
