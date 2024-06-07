@@ -134,6 +134,17 @@ class Commander:
                             client_information, client_state_info
                         )
                         clients[client_information.chat_id] = client_state_info
+                    elif (
+                        client_information.text == "/report_per_month"
+                        or clients[client_information.chat_id].command.current_command
+                        == Commands.REPORT_PER_MONTH
+                    ):
+                        client_state_info = (
+                            self.personal_report_service.report_per_month(
+                                client_information, client_state_info
+                            )
+                        )
+                        clients[client_information.chat_id] = client_state_info
                     else:
                         self.client.send_message(
                             client_information.chat_id, WRONG_INPUT

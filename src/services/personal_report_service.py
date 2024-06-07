@@ -4,8 +4,15 @@ from ..app.client_info import ClientStateInfo, ClientInformation
 from datetime import date
 import matplotlib.pyplot as plt
 import seaborn as sns
+import locale
 
 sns.set()
+
+
+locale.setlocale(
+    category=locale.LC_ALL,
+    locale="Russian",
+)
 
 
 class ReportService:
@@ -21,6 +28,20 @@ class ReportService:
         result = self.repository.report_per_day(client_information.chat_id)
         print(result)
         self.plot_report(result, f"Отчет за {date.today()}", client_information)
+        return client_state_info
+
+    def report_per_month(
+        self, client_information: ClientInformation, client_state_info: ClientStateInfo
+    ):
+        client_state_info.last_info.chat_id = client_information.chat_id
+        client_state_info.last_info.name = client_information.first_name
+        result = self.repository.report_per_month(client_information.chat_id)
+        print(result)
+        self.plot_report(
+            result,
+            f"Отчет за месяц {date.today().strftime('%B %Y')}",
+            client_information,
+        )
         return client_state_info
 
     def plot_report(

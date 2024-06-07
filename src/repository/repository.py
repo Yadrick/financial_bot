@@ -168,4 +168,29 @@ INSERT INTO users (id, name) SELECT %s, %s WHERE NOT EXISTS (SELECT 1 FROM users
             cursor.close()
 
     def report_per_month(self, chat_id: str):
-        pass
+        try:
+            cursor = self.connect.cursor()
+            transactions_date = date.today()
+            current_month = transactions_date.month
+            current_year = transactions_date.year
+            print(transactions_date)
+            query = """
+        SELECT categories.type, SUM(transactions.amount_money)
+        FROM transactions
+        JOIN categories ON transactions.category_id = categories.id
+        WHERE transactions.user_id = %s
+        AND EXTRACT(MONTH FROM transactions.date) = %s
+        AND EXTRACT(YEAR FROM transactions.date) = %s
+        GROUP BY categories.type
+    """
+            cursor.execute(
+                query,
+                (chat_id, current_month, current_year),
+            )
+            result = cursor.fetchall()
+            return result
+        except psycopg.Error as e:
+            print("Error:", e)
+            return None
+        finally:
+            cursor.close()
