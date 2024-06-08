@@ -1,17 +1,22 @@
 from enum import Enum
 from typing import Protocol
 
+from ..app.event import Event
+
 
 class BaseStateMachine(Protocol):
     """
     Class for storing and updating client state
     """
 
-    def get_state(self) -> Enum:
+    def is_complete(self) -> bool:
         raise NotImplementedError
 
-    def go_next_state(self) -> None:
+    def _go_next_state(self) -> None:
         raise NotImplementedError
 
-    def is_on(self) -> bool:
+    def process(self, event: Event) -> None:
+        raise NotImplementedError
+
+    def _state_resolver(self, event: Event) -> None:
         raise NotImplementedError

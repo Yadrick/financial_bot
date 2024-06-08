@@ -1,7 +1,7 @@
 from ..app.event import Event
 from ..repository.interface import BaseRepository
 from ..client.interface import BaseClient
-from ..config.config import MESSAGE_SHOW_INCOME_CATEGORY, MESSAGE_SHOW_EXPENSE_CATEGORY
+from ..config.config import MESSAGE_SHOW_INCOME_CATEGORY
 from ..config.config import (
     DELETE_INCOME_CATEGORY_MESSAGE,
     CATEGORY_SUCCESSFULLY_DELETED,
@@ -10,12 +10,11 @@ from ..config.config import (
 )
 
 
-class CategoryActionsService:
+class IncomeCategoryActionsService:
     def __init__(self, client: BaseClient, repository: BaseRepository):
         self._client = client
         self._repository = repository
         self._type_category_income = 'income'
-        self._type_category_expense = 'expense'
         self._chat_id = ''
 
     def start_processing(self, event: Event) -> None:
@@ -47,29 +46,6 @@ class CategoryActionsService:
         event.text = event.text.capitalize()
         result = self._repository.delete_category_and_related_transactions(
             event, self._type_category_income
-        )
-        if result:
-            self._client.send_message(
-                self._chat_id, CATEGORY_SUCCESSFULLY_DELETED
-            )
-        else:
-            self._client.send_message(
-                self._chat_id, CATEGORY_NOT_DELETED
-            )
-
-    def get_expense_categories(self, event: Event) -> None:
-        categories = self._repository.get_categories(
-            self._type_category_expense, event.user.chat_id
-        )
-        self._client.send_message(
-            event.user.chat_id, MESSAGE_SHOW_EXPENSE_CATEGORY + str(categories)
-        )
-        self._repository.save_user(event)
-
-    def delete_expense_categories(self, event: Event) -> None:
-        event.text = event.text.capitalize()
-        result = self._repository.delete_category_and_related_transactions(
-            event, self._type_category_expense
         )
         if result:
             self._client.send_message(

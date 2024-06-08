@@ -6,3 +6,7 @@ class BaseAppError(Exception):
 
 class WrongInputError(BaseAppError):
     pass
+
+
+class AppError(BaseAppError):
+    pass
