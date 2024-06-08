@@ -1,6 +1,7 @@
 from .categories import Categories
 from ..app.client_info import ClientLastInfo
 from ..repository.interface import BaseRepository
+from datetime import date
 import psycopg
 
 
@@ -11,6 +12,58 @@ class PostgreSQLRepository(BaseRepository):
 
     def __init__(self, connection):
         self.connect = connection
+
+    def save(self, last_info: ClientLastInfo, type_category: str):
+        try:
+            cursor = self.connect.cursor()
+            query_users = """
+INSERT INTO users (id, name) SELECT %s, %s WHERE NOT EXISTS (SELECT 1 FROM users WHERE id = %s);
+"""
+            query_category = """
+INSERT INTO categories (name, type, user_id) SELECT %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = %s);
+"""
+            query_id_category = "SELECT id FROM categories WHERE name = %s AND user_id = %s AND type = %s"
+            query_trans = "INSERT INTO transactions (date, amount_money, category_id, user_id) VALUES ( %s, %s, %s, %s);"
+
+            cursor.execute(
+                query_users,
+                (
+                    last_info.chat_id,
+                    last_info.name,
+                    last_info.chat_id,
+                ),
+            )
+            cursor.execute(
+                query_category,
+                (
+                    last_info.category,
+                    type_category,
+                    last_info.chat_id,
+                    last_info.category,
+                ),
+            )
+
+            cursor.execute(
+                query_id_category,
+                (last_info.category, last_info.chat_id, type_category),
+            )
+            category_id = cursor.fetchone()
+
+            cursor.execute(
+                query_trans,
+                (
+                    last_info.date,
+                    last_info.amount,
+                    category_id[0],
+                    last_info.chat_id,
+                ),
+            )
+
+        except psycopg.Error as e:
+            print("Error:", e)
+        finally:
+            self.connect.commit()
+            cursor.close()
 
     def save_user(self, last_info: ClientLastInfo):
         try:
@@ -23,52 +76,6 @@ INSERT INTO users (id, name) SELECT %s, %s WHERE NOT EXISTS (SELECT 1 FROM users
                 (
                     last_info.chat_id,
                     last_info.name,
-                    last_info.chat_id,
-                ),
-            )
-        except psycopg.Error as e:
-            print("Error:", e)
-        finally:
-            self.connect.commit()
-            cursor.close()
-
-    def save_category(self, last_info: ClientLastInfo, type_category: str):
-        try:
-            cursor = self.connect.cursor()
-            query_category = """
-INSERT INTO categories (name, type, user_id) SELECT %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = %s);
-"""
-            cursor.execute(
-                query_category,
-                (
-                    last_info.category,
-                    type_category,
-                    last_info.chat_id,
-                    last_info.category,
-                ),
-            )
-        except psycopg.Error as e:
-            print("Error:", e)
-        finally:
-            self.connect.commit()
-            cursor.close()
-
-    def save_transaction(self, last_info: ClientLastInfo, type_category: str):
-        try:
-            cursor = self.connect.cursor()
-            query_id_category = "SELECT id FROM categories WHERE name = %s AND user_id = %s AND type = %s"
-            cursor.execute(
-                query_id_category,
-                (last_info.category, last_info.chat_id, type_category),
-            )
-            category_id = cursor.fetchone()
-            query_trans = "INSERT INTO transactions (date, amount_money, category_id, user_id) VALUES ( %s, %s, %s, %s);"
-            cursor.execute(
-                query_trans,
-                (
-                    last_info.date,
-                    last_info.amount,
-                    category_id[0],
                     last_info.chat_id,
                 ),
             )
@@ -134,4 +141,56 @@ INSERT INTO categories (name, type, user_id) SELECT %s, %s, %s WHERE NOT EXISTS 
             print("Error:", e)
         finally:
             self.connect.commit()
+            cursor.close()
+
+    def report_per_day(self, chat_id: str):
+        try:
+            cursor = self.connect.cursor()
+            transactions_date = date.today()
+            print(transactions_date)
+            query = """
+        SELECT categories.type, SUM(transactions.amount_money)
+        FROM transactions
+        JOIN categories ON transactions.category_id = categories.id
+        WHERE transactions.user_id = %s AND transactions.date = %s
+        GROUP BY categories.type
+    """
+            cursor.execute(
+                query,
+                (chat_id, transactions_date),
+            )
+            result = cursor.fetchall()
+            return result
+        except psycopg.Error as e:
+            print("Error:", e)
+            return None
+        finally:
+            cursor.close()
+
+    def report_per_month(self, chat_id: str):
+        try:
+            cursor = self.connect.cursor()
+            transactions_date = date.today()
+            current_month = transactions_date.month
+            current_year = transactions_date.year
+            print(transactions_date)
+            query = """
+        SELECT categories.type, SUM(transactions.amount_money)
+        FROM transactions
+        JOIN categories ON transactions.category_id = categories.id
+        WHERE transactions.user_id = %s
+        AND EXTRACT(MONTH FROM transactions.date) = %s
+        AND EXTRACT(YEAR FROM transactions.date) = %s
+        GROUP BY categories.type
+    """
+            cursor.execute(
+                query,
+                (chat_id, current_month, current_year),
+            )
+            result = cursor.fetchall()
+            return result
+        except psycopg.Error as e:
+            print("Error:", e)
+            return None
+        finally:
             cursor.close()

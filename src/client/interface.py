@@ -7,3 +7,6 @@ class BaseClient(Protocol):
 
     def send_message(self, chat_id: int, text: str) -> dict:
         raise NotImplementedError
+
+    def send_photo(self, chat_id: int, photo_path):
+        raise NotImplementedError

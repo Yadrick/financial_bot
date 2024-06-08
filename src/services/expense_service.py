@@ -1,8 +1,7 @@
 from ..app.machine_state import State
 from ..app.machine_commands import Commands
 from ..client.interface import BaseClient
-from ..client.client import ClientInformation
-from ..app.commander import ClientStateInfo
+from ..app.client_info import ClientStateInfo, ClientInformation
 from ..repository.interface import BaseRepository
 from ..config.config import (
     MESSAGE_ENTER_DATE,
@@ -53,7 +52,6 @@ class MakeExpenseService:
         client_state_info.last_info.category = category
         client_state_info.state.change_state(State.RECEIVED_DATE)
         self.client.send_message(client_information.chat_id, MESSAGE_ENTER_DATE)
-        self.repository.save_category(client_state_info.last_info, self.type_category)
         return client_state_info
 
     def _date_processing(
@@ -76,10 +74,7 @@ class MakeExpenseService:
             client_state_info.last_info.amount = amount
             client_state_info.state.change_state(State.START)
             client_state_info.command.change_command(Commands.NONE)
-
-            self.repository.save_transaction(
-                client_state_info.last_info, self.type_category
-            )
+            self.repository.save(client_state_info.last_info, self.type_category)
             message = SAVED_RECORD.format(
                 category=client_state_info.last_info.category,
                 date=client_state_info.last_info.date.strftime("%d-%m-%Y"),

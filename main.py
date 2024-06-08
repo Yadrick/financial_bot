@@ -6,6 +6,7 @@ from src.services.income_service import MakeIncomeService
 from src.services.expense_service import MakeExpenseService
 from src.services.category_service import CategoryActionsService
 from src.repository.repository import PostgreSQLRepository
+from src.services.personal_report_service import ReportService
 
 import psycopg
 import os
@@ -30,8 +31,13 @@ def main():
         make_income_service = MakeIncomeService(client, repository)
         make_expense_service = MakeExpenseService(client, repository)
         category_service = CategoryActionsService(client, repository)
+        personal_report_service = ReportService(client, repository)
         commander = Commander(
-            client, make_income_service, make_expense_service, category_service
+            client,
+            make_income_service,
+            make_expense_service,
+            category_service,
+            personal_report_service,
         )
 
         app = TelegramBotApp(commander)

@@ -1,7 +1,6 @@
 from ..repository.interface import BaseRepository
 from ..client.interface import BaseClient
-from ..app.commander import ClientStateInfo
-from ..client.client import ClientInformation
+from ..app.client_info import ClientStateInfo, ClientInformation
 from ..config.config import MESSAGE_SHOW_INCOME_CATEGORY, MESSAGE_SHOW_EXPENSE_CATEGORY
 
 
