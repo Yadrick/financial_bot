@@ -21,13 +21,17 @@ project: https://github.com/users/Yadrick/projects/2
 ![State Machine](assets/state_machine.png)
 
 ### Примеры работы бота
+
 Пример записи расхода:
+
 ![Example Expense Record](assets/expense_record_example.png)
 
 Пример некорректного ввода:
+
 ![Example Of Incorrect Input](assets/example_of_incorrect_input.png)
 
 Пример удаления записи:
+
 ![Example Of Record Deletion](assets/example_of_record_deletion.png)
 
 
