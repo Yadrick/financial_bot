@@ -37,6 +37,9 @@ class MakeExpenseService:
         self._repository = repository
         self._income_tr_info = ExpenseTransactionInfo()
 
+    def get_categories(self, user_id: int, category_type):
+        self._repository.get_categories(category_type, user_id)
+
     def start_processing(self, event: Event) -> None:
         self._income_tr_info.chat_id = event.user.chat_id
         self._income_tr_info.first_name = event.user.first_name
