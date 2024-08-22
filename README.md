@@ -17,7 +17,7 @@ project: https://github.com/users/Yadrick/projects/2
 ### Компонентное взаимодействие / Архитектура
 ![Component Communication](assets/component_communication.png)
 
-### Состояния машины при записи доходов или расходов
+### Машина состояний записи доходов или расходов
 ![State Machine](assets/state_machine.png)
 
 ### Примеры работы бота
